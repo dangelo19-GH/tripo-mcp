@@ -18,7 +18,7 @@ logger = logging.getLogger("BlenderMCPServer")
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.tripo_api import TripoClient, TaskStatus
+from tripo_api import TripoClient, TaskStatus
 
 
 @dataclass
