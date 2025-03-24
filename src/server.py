@@ -1,3 +1,31 @@
+"""
+MIT License
+
+Copyright (c) 2025 Siddharth Ahuja
+Copyright (c) 2025 for additions
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+This file is based on work by Siddharth Ahuja, with additional contributions
+for Tripo MCP functionality.
+"""
+
 from mcp.server.fastmcp import FastMCP, Context, Image
 import os
 import sys
@@ -216,6 +244,7 @@ _blender_connection = None
 _polyhaven_enabled = False  # Add this global variable
 _tripo_apikey = ""
 
+
 def get_blender_connection():
     """Get or create a persistent Blender connection"""
     global _blender_connection, _polyhaven_enabled, _tripo_apikey  # Add _polyhaven_enabled to globals
@@ -253,6 +282,7 @@ def get_blender_connection():
 
     return _blender_connection
 
+
 @mcp.tool()
 def get_scene_info(ctx: Context) -> str:
     """Get detailed information about the current Blender scene"""
@@ -265,6 +295,7 @@ def get_scene_info(ctx: Context) -> str:
     except Exception as e:
         logger.error(f"Error getting scene info from Blender: {str(e)}")
         return f"Error getting scene info: {str(e)}"
+
 
 @mcp.tool()
 def get_object_info(ctx: Context, object_name: str) -> str:
@@ -283,6 +314,7 @@ def get_object_info(ctx: Context, object_name: str) -> str:
     except Exception as e:
         logger.error(f"Error getting object info from Blender: {str(e)}")
         return f"Error getting object info: {str(e)}"
+
 
 @mcp.tool()
 def create_object(
@@ -322,6 +354,7 @@ def create_object(
     except Exception as e:
         logger.error(f"Error creating object: {str(e)}")
         return f"Error creating object: {str(e)}"
+
 
 @mcp.tool()
 def modify_object(
@@ -363,6 +396,7 @@ def modify_object(
         logger.error(f"Error modifying object: {str(e)}")
         return f"Error modifying object: {str(e)}"
 
+
 @mcp.tool()
 def delete_object(ctx: Context, name: str) -> str:
     """
@@ -380,6 +414,7 @@ def delete_object(ctx: Context, name: str) -> str:
     except Exception as e:
         logger.error(f"Error deleting object: {str(e)}")
         return f"Error deleting object: {str(e)}"
+
 
 @mcp.tool()
 def set_material(
@@ -410,6 +445,7 @@ def set_material(
         logger.error(f"Error setting material: {str(e)}")
         return f"Error setting material: {str(e)}"
 
+
 @mcp.tool()
 def execute_blender_code(ctx: Context, code: str) -> str:
     """
@@ -427,6 +463,7 @@ def execute_blender_code(ctx: Context, code: str) -> str:
     except Exception as e:
         logger.error(f"Error executing code: {str(e)}")
         return f"Error executing code: {str(e)}"
+
 
 @mcp.tool()
 def get_polyhaven_categories(ctx: Context, asset_type: str = "hdris") -> str:
@@ -461,6 +498,7 @@ def get_polyhaven_categories(ctx: Context, asset_type: str = "hdris") -> str:
     except Exception as e:
         logger.error(f"Error getting Polyhaven categories: {str(e)}")
         return f"Error getting Polyhaven categories: {str(e)}"
+
 
 @mcp.tool()
 def search_polyhaven_assets(
@@ -518,6 +556,7 @@ def search_polyhaven_assets(
     except Exception as e:
         logger.error(f"Error searching Polyhaven assets: {str(e)}")
         return f"Error searching Polyhaven assets: {str(e)}"
+
 
 @mcp.tool()
 def download_polyhaven_asset(
@@ -577,6 +616,7 @@ def download_polyhaven_asset(
         logger.error(f"Error downloading Polyhaven asset: {str(e)}")
         return f"Error downloading Polyhaven asset: {str(e)}"
 
+
 @mcp.tool()
 def set_texture(ctx: Context, object_name: str, texture_id: str) -> str:
     """
@@ -632,6 +672,7 @@ def set_texture(ctx: Context, object_name: str, texture_id: str) -> str:
         logger.error(f"Error applying texture: {str(e)}")
         return f"Error applying texture: {str(e)}"
 
+
 @mcp.tool()
 def get_polyhaven_status(ctx: Context) -> str:
     """
@@ -648,6 +689,7 @@ def get_polyhaven_status(ctx: Context) -> str:
     except Exception as e:
         logger.error(f"Error checking PolyHaven status: {str(e)}")
         return f"Error checking PolyHaven status: {str(e)}"
+
 
 @mcp.prompt()
 def asset_creation_strategy() -> str:
@@ -672,6 +714,7 @@ def asset_creation_strategy() -> str:
     - No suitable PolyHaven asset exists
     - The task specifically requires a basic material/color
     """
+
 
 @mcp.tool()
 async def create_3d_model_from_text(
@@ -738,25 +781,26 @@ async def create_3d_model_from_text(
                 "4. When status is SUCCESS, use the pbr_model_url from the response",
             ],
         }
-        
+
+
 @mcp.tool()
 def import_tripo_glb_model(ctx: Context, glb_url: str) -> str:
     """
     Import a GLB model from URL into Blender scene
-    
+
     Parameters:
     - glb_url: Download URL of the GLB model file
-    
+
     Returns:
     Result message of the import operation
     """
     try:
         blender = get_blender_connection()
         result = blender.send_command("import_tripo_glb_model", {"url": glb_url})
-        
+
         if "error" in result:
             return f"Import failed: {result['error']}"
-            
+
         if result.get("status") == "success":
             output = ["Successfully imported models:"]
             for model in result.get("models", []):
@@ -765,17 +809,18 @@ def import_tripo_glb_model(ctx: Context, glb_url: str) -> str:
                     f"• {model['name']} | Dimensions: "
                     f"{dim['x']} x {dim['y']} x {dim['z']} meters"
                 )
-            
+
             if not output:
                 output.append("No models found in imported file")
-                
+
             return "\n".join(output)
         else:
             return f"Import failed: {result.get('message', 'Unknown error')}"
-            
+
     except Exception as e:
         logger.error(f"Error importing GLB model: {str(e)}")
         return f"GLB model import failed: {str(e)}"
+
 
 @mcp.tool()
 async def get_task_status(task_id: str) -> Dict[str, Any]:
@@ -873,9 +918,11 @@ async def get_task_status(task_id: str) -> Dict[str, Any]:
 
         return result
 
-def main(): 
+
+def main():
     # mcp.run("sse")
-    mcp.run(transport='stdio')
+    mcp.run(transport="stdio")
+
 
 if __name__ == "__main__":
     main()
