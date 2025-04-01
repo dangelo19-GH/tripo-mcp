@@ -27,7 +27,7 @@ Tripo MCP provides an interface between AI assistants and [Tripo AI](https://www
 
 ## Acknowledgements
 
-- **[Tripo AI](https://www.tripo3d.ai)
+- **[Tripo AI](https://www.tripo3d.ai)**
 - **[blender-mcp](https://github.com/ahujasid/blender-mcp)** by [Siddharth Ahuja](https://github.com/ahujasid)
 
 **Special Thanks**  
