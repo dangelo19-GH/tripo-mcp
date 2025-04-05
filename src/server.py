@@ -37,6 +37,7 @@ import logging
 from dataclasses import dataclass
 from contextlib import asynccontextmanager
 from typing import AsyncIterator, Dict, Any, List
+import time
 
 # Configure logging
 logging.basicConfig(
@@ -53,24 +54,37 @@ from tripo_api import TripoClient, TaskStatus
 class BlenderConnection:
     host: str
     port: int
-    sock: socket.socket = (
-        None  # Changed from 'socket' to 'sock' to avoid naming conflict
-    )
+    sock: socket.socket = None
+    max_retries: int = 3
+    retry_delay: float = 1.0
 
     def connect(self) -> bool:
-        """Connect to the Blender addon socket server"""
+        """Connect to the Blender addon socket server with retries"""
         if self.sock:
-            return True
+            try:
+                # Test if connection is still alive
+                self.sock.send(b'')
+                return True
+            except:
+                self.disconnect()
 
-        try:
-            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.sock.connect((self.host, self.port))
-            logger.info(f"Connected to Blender at {self.host}:{self.port}")
-            return True
-        except Exception as e:
-            logger.error(f"Failed to connect to Blender: {str(e)}")
-            self.sock = None
-            return False
+        for attempt in range(self.max_retries):
+            try:
+                self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+                self.sock.connect((self.host, self.port))
+                logger.info(f"Connected to Blender at {self.host}:{self.port}")
+                return True
+            except Exception as e:
+                logger.warning(f"Connection attempt {attempt + 1} failed: {str(e)}")
+                if self.sock:
+                    self.sock.close()
+                    self.sock = None
+                if attempt < self.max_retries - 1:
+                    time.sleep(self.retry_delay)
+        
+        logger.error(f"Failed to connect to Blender after {self.max_retries} attempts")
+        return False
 
     def disconnect(self):
         """Disconnect from the Blender addon"""
@@ -236,8 +250,9 @@ mcp = FastMCP(
     name="Tripo MCP",
     instructions="MCP for Tripo Blender addon",
     lifespan=server_lifespan,
-    # host="127.0.0.1",
-    # port=8392,
+    host="127.0.0.1",
+    port=8392,
+    blender_port=9876
 )
 
 _blender_connection = None
@@ -920,8 +935,8 @@ async def get_task_status(task_id: str) -> Dict[str, Any]:
 
 
 def main():
-    # mcp.run("sse")
-    mcp.run(transport="stdio")
+    # Run the server with SSE transport for Cursor connection
+    mcp.run(transport="sse")
 
 
 if __name__ == "__main__":
